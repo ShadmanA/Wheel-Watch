@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
-import { ScrollView, Text, View } from "react-native";
+import { router } from "expo-router";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { images } from "@/constants/images";
 
@@ -60,6 +61,16 @@ export default function Index() {
           A revolutionary vehicle surveillance platform for automotive vehicles.
         </Text>
       </View>
+
+      <TouchableOpacity
+        className="rounded-full bg-ww-deep-purple px-6 py-3"
+        activeOpacity={0.85}
+        onPress={() => router.push("/onboarding")}
+      >
+        <Text className="font-poppins-semibold text-base text-white">
+          View Onboarding
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
