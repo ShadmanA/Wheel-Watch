@@ -1,8 +1,10 @@
+import { useSignUp } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,11 +19,61 @@ import { AuthTextField } from "@/components/auth/AuthTextField";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { VerificationModal } from "@/components/auth/VerificationModal";
 import { images } from "@/constants/images";
+import { useSocialAuth } from "@/hooks/useSocialAuth";
 
 export default function SignUp() {
+  const { signUp } = useSignUp();
+  const { signInWithProvider } = useSocialAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const finalizeSignUp = async () => {
+    await signUp.finalize({
+      navigate: ({ session }) => {
+        if (!session?.currentTask) {
+          router.replace("/");
+        }
+      },
+    });
+  };
+
+  const handleSignUp = async () => {
+    setIsSubmitting(true);
+    const { error } = await signUp.password({ emailAddress: email, password });
+    setIsSubmitting(false);
+
+    if (error) {
+      Alert.alert("Sign up failed", error.longMessage ?? error.message);
+      return;
+    }
+
+    if (signUp.status === "complete") {
+      await finalizeSignUp();
+      return;
+    }
+
+    if (signUp.unverifiedFields.includes("email_address")) {
+      await signUp.verifications.sendEmailCode();
+      setIsVerifying(true);
+    }
+  };
+
+  const handleVerify = async (code: string) => {
+    const { error } = await signUp.verifications.verifyEmailCode({ code });
+
+    if (error) {
+      Alert.alert("Invalid code", error.longMessage ?? error.message);
+      return;
+    }
+
+    if (signUp.status === "complete") {
+      setIsVerifying(false);
+      await finalizeSignUp();
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
@@ -79,7 +131,8 @@ export default function SignUp() {
           <TouchableOpacity
             className="mt-6 items-center rounded-2xl bg-ww-deep-purple py-4"
             activeOpacity={0.85}
-            onPress={() => setIsVerifying(true)}
+            onPress={handleSignUp}
+            disabled={!email || !password || isSubmitting}
           >
             <Text className="font-poppins-semibold text-lg text-white">
               Sign Up
@@ -93,9 +146,18 @@ export default function SignUp() {
           </View>
 
           <View className="gap-3">
-            <SocialAuthButton provider="google" />
-            <SocialAuthButton provider="facebook" />
-            <SocialAuthButton provider="apple" />
+            <SocialAuthButton
+              provider="google"
+              onPress={() => signInWithProvider("google")}
+            />
+            <SocialAuthButton
+              provider="facebook"
+              onPress={() => signInWithProvider("facebook")}
+            />
+            <SocialAuthButton
+              provider="apple"
+              onPress={() => signInWithProvider("apple")}
+            />
           </View>
 
           <View className="mt-8 flex-row justify-center gap-1">
@@ -113,7 +175,7 @@ export default function SignUp() {
         visible={isVerifying}
         email={email || "your email"}
         onClose={() => setIsVerifying(false)}
-        onComplete={() => router.replace("/")}
+        onComplete={handleVerify}
       />
     </SafeAreaView>
   );

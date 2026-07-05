@@ -1,5 +1,6 @@
+import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { images } from "@/constants/images";
@@ -44,6 +45,16 @@ function ColorRow({
 }
 
 export default function Index() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (!isSignedIn) {
+    return <Redirect href="/onboarding" />;
+  }
+
   return (
     <ScrollView
       className="flex-1 bg-background"

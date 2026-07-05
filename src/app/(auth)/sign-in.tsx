@@ -1,8 +1,10 @@
+import { useSignIn } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,10 +19,52 @@ import { AuthTextField } from "@/components/auth/AuthTextField";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { VerificationModal } from "@/components/auth/VerificationModal";
 import { images } from "@/constants/images";
+import { useSocialAuth } from "@/hooks/useSocialAuth";
 
 export default function SignIn() {
+  const { signIn } = useSignIn();
+  const { signInWithProvider } = useSocialAuth();
+
   const [email, setEmail] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const finalizeSignIn = async () => {
+    await signIn.finalize({
+      navigate: ({ session }) => {
+        if (!session?.currentTask) {
+          router.replace("/");
+        }
+      },
+    });
+  };
+
+  const handleSignIn = async () => {
+    setIsSubmitting(true);
+    const { error } = await signIn.emailCode.sendCode({ emailAddress: email });
+    setIsSubmitting(false);
+
+    if (error) {
+      Alert.alert("Sign in failed", error.longMessage ?? error.message);
+      return;
+    }
+
+    setIsVerifying(true);
+  };
+
+  const handleVerify = async (code: string) => {
+    const { error } = await signIn.emailCode.verifyCode({ code });
+
+    if (error) {
+      Alert.alert("Invalid code", error.longMessage ?? error.message);
+      return;
+    }
+
+    if (signIn.status === "complete") {
+      setIsVerifying(false);
+      await finalizeSignIn();
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
@@ -71,7 +115,8 @@ export default function SignIn() {
           <TouchableOpacity
             className="mt-6 items-center rounded-2xl bg-ww-deep-purple py-4"
             activeOpacity={0.85}
-            onPress={() => setIsVerifying(true)}
+            onPress={handleSignIn}
+            disabled={!email || isSubmitting}
           >
             <Text className="font-poppins-semibold text-lg text-white">
               Sign In
@@ -85,9 +130,18 @@ export default function SignIn() {
           </View>
 
           <View className="gap-3">
-            <SocialAuthButton provider="google" />
-            <SocialAuthButton provider="facebook" />
-            <SocialAuthButton provider="apple" />
+            <SocialAuthButton
+              provider="google"
+              onPress={() => signInWithProvider("google")}
+            />
+            <SocialAuthButton
+              provider="facebook"
+              onPress={() => signInWithProvider("facebook")}
+            />
+            <SocialAuthButton
+              provider="apple"
+              onPress={() => signInWithProvider("apple")}
+            />
           </View>
 
           <View className="mt-8 flex-row justify-center gap-1">
@@ -105,7 +159,7 @@ export default function SignIn() {
         visible={isVerifying}
         email={email || "your email"}
         onClose={() => setIsVerifying(false)}
-        onComplete={() => router.replace("/")}
+        onComplete={handleVerify}
       />
     </SafeAreaView>
   );
