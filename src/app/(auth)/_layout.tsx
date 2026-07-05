@@ -9,7 +9,7 @@ export default function AuthLayout() {
   }
 
   if (isSignedIn) {
-    return <Redirect href="/" />;
+    return <Redirect href="/face-capture" />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;

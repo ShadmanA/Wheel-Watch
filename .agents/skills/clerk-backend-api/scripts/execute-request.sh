@@ -12,7 +12,9 @@
 set -euo pipefail
 
 # Walk up from $PWD to find .env/.env.local (mirrors Clerk CLI behavior).
-# Stops at the first directory that provides CLERK_SECRET_KEY.
+# Stops at the first directory that provides CLERK_SECRET_KEY, or at the
+# repo root (a directory containing .git), whichever comes first, so this
+# never sources an unrelated .env outside the current project.
 _dir="$PWD"
 while true; do
   for _envfile in "$_dir/.env" "$_dir/.env.local"; do
@@ -23,6 +25,7 @@ while true; do
     fi
   done
   [[ -n "${CLERK_SECRET_KEY:-}" ]] && break
+  [[ -e "$_dir/.git" ]] && break
   _parent="$(dirname "$_dir")"
   [[ "$_parent" == "$_dir" ]] && break
   _dir="$_parent"

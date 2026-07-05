@@ -43,7 +43,11 @@ import { ClerkProvider } from '@clerk/expo'
 import { tokenCache } from '@clerk/expo/token-cache'
 import { Stack } from 'expo-router'
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+if (!publishableKey) {
+  throw new Error('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY')
+}
 
 export default function RootLayout() {
   return (
@@ -74,9 +78,10 @@ npx expo install expo-secure-store
 import { useAuth, useUser, useSignIn, useSignUp, useClerk } from '@clerk/expo'
 
 export function ProfileScreen() {
-  const { isSignedIn, userId, signOut } = useAuth()
+  const { isLoaded, isSignedIn, userId, signOut } = useAuth()
   const { user } = useUser()
 
+  if (!isLoaded) return null
   if (!isSignedIn) return <Redirect href="/sign-in" />
   return (
     <View>
@@ -91,6 +96,7 @@ export function ProfileScreen() {
 
 ```tsx
 import { useSSO } from '@clerk/expo'
+import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 
 WebBrowser.maybeCompleteAuthSession()
@@ -102,9 +108,9 @@ export function GoogleSignIn() {
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy: 'oauth_google',
-        redirectUrl: 'myapp://oauth-callback',
+        redirectUrl: Linking.createURL('/oauth-native-callback'),
       })
-      if (createdSessionId) await setActive!({ session: createdSessionId })
+      if (createdSessionId && setActive) await setActive({ session: createdSessionId })
     } catch (err) {
       console.error(err)
     }
