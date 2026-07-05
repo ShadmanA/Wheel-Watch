@@ -26,7 +26,7 @@ export function useSocialAuth() {
 
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
-        router.replace("/");
+        router.replace("/face-capture");
       }
     } catch (err) {
       console.error(err);

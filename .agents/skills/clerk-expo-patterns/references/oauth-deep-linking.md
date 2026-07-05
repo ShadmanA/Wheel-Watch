@@ -18,6 +18,7 @@
 
 ```tsx
 import { useSSO } from '@clerk/expo'
+import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { useEffect } from 'react'
 
@@ -30,11 +31,11 @@ export function SignInScreen() {
     try {
       const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
         strategy: 'oauth_google',
-        redirectUrl: 'myapp://oauth-callback',
+        redirectUrl: Linking.createURL('/oauth-native-callback'),
       })
 
-      if (createdSessionId) {
-        await setActive!({ session: createdSessionId })
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId })
       } else if (signUp?.status === 'missing_requirements') {
         // Handle missing fields (e.g. username)
       }
@@ -59,15 +60,14 @@ export function SignInScreen() {
 
 ## Callback Screen
 
-Create `app/oauth-callback.tsx`:
+Create a top-level route `app/oauth-native-callback.tsx` (must match the path passed to `Linking.createURL(...)`):
 
 ```tsx
-import { useEffect } from 'react'
 import * as WebBrowser from 'expo-web-browser'
 
 WebBrowser.maybeCompleteAuthSession()
 
-export default function OAuthCallback() {
+export default function OAuthNativeCallback() {
   return null
 }
 ```
@@ -75,5 +75,5 @@ export default function OAuthCallback() {
 ## CRITICAL
 
 - `WebBrowser.maybeCompleteAuthSession()` must be called at the TOP LEVEL of the callback screen (not inside a hook or effect)
-- `redirectUrl` must match the scheme in `app.json` exactly
+- `redirectUrl` must resolve to the same path as the callback screen — use `Linking.createURL('/oauth-native-callback')` rather than hardcoding the scheme, so it stays correct across dev/standalone builds
 - `useSSO` replaces `useOAuth` from older `@clerk/expo` versions

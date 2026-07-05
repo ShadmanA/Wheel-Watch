@@ -2,7 +2,8 @@
 # extract-tag-endpoints.sh
 #
 # Extracts all endpoints for a given tag from an OpenAPI YAML spec (stdin),
-# along with any $ref'd schemas/components.
+# along with the names of any $ref'd schemas/components (not their resolved
+# bodies — use extract-endpoint-detail.sh to resolve a specific endpoint's refs).
 #
 # Usage:
 #   curl -s <spec-url> | bash extract-tag-endpoints.sh "Billing"

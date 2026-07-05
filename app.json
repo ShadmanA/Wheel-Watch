@@ -32,6 +32,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Wheel Watch accesses your photos to verify your identity.",
+          "cameraPermission": "Wheel Watch accesses your camera to verify your identity."
+        }
       ]
     ],
     "experiments": {

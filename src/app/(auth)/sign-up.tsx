@@ -34,7 +34,7 @@ export default function SignUp() {
     await signUp.finalize({
       navigate: ({ session }) => {
         if (!session?.currentTask) {
-          router.replace("/");
+          router.replace("/face-capture");
         }
       },
     });
@@ -42,21 +42,33 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     setIsSubmitting(true);
+
     const { error } = await signUp.password({ emailAddress: email, password });
-    setIsSubmitting(false);
 
     if (error) {
+      setIsSubmitting(false);
       Alert.alert("Sign up failed", error.longMessage ?? error.message);
       return;
     }
 
     if (signUp.status === "complete") {
+      setIsSubmitting(false);
       await finalizeSignUp();
       return;
     }
 
     if (signUp.unverifiedFields.includes("email_address")) {
-      await signUp.verifications.sendEmailCode();
+      const { error: sendCodeError } = await signUp.verifications.sendEmailCode();
+      setIsSubmitting(false);
+
+      if (sendCodeError) {
+        Alert.alert(
+          "Couldn't send verification code",
+          sendCodeError.longMessage ?? sendCodeError.message,
+        );
+        return;
+      }
+
       setIsVerifying(true);
     }
   };

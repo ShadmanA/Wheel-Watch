@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-Prefix the env var with `NUXT_` (i.e. `NUXT_CLERK_WEBHOOK_SIGNING_SECRET`) per Nuxt runtime config rules.
+`verifyWebhook` still reads `CLERK_WEBHOOK_SIGNING_SECRET` under the hood — don't rename the secret itself. Nuxt runtime config just requires the env var to also be exposed under a `NUXT_`-prefixed alias (`NUXT_CLERK_WEBHOOK_SIGNING_SECRET`) for `useRuntimeConfig()` to pick it up; set both, or configure the alias to point at the same value.
 
 When tunneling via ngrok in dev, allow the host in `nuxt.config.ts`:
 
@@ -195,7 +195,7 @@ export const ServerRoute = createServerFileRoute().methods({
 })
 ```
 
-When tunneling via ngrok in dev, allow the host in `app.config.ts`:
+When tunneling via ngrok in dev, allow the host in `vite.config.ts` (TanStack Start's dev server is Vite-based):
 
 ```typescript
 import { defineConfig } from 'vite'

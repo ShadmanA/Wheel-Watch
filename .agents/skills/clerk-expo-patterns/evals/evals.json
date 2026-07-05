@@ -63,7 +63,8 @@
         "Destructures user from useUser()",
         "Shows user.fullName or user.firstName",
         "Handles the case where user is null (not yet loaded)",
-        "Accesses email via user.primaryEmailAddress?.emailAddress"
+        "Accesses email via user.primaryEmailAddress?.emailAddress",
+        "Renders the avatar from user.imageUrl (e.g. an Image component)"
       ]
     },
     {

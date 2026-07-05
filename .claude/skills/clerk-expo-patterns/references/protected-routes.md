@@ -46,8 +46,10 @@ export default function ProfileScreen() {
 
 ```
 app/
-├── _layout.tsx           # Root layout with ClerkProvider
-├── (public)/
+├── _layout.tsx                 # Root layout with ClerkProvider
+├── oauth-native-callback.tsx   # Top-level OAuth deep link callback (see oauth-deep-linking.md)
+├── (auth)/
+│   ├── _layout.tsx             # Redirects signed-in users away from sign-in/sign-up
 │   ├── sign-in.tsx
 │   └── sign-up.tsx
 └── (protected)/

@@ -14,11 +14,11 @@ User Prompt: $ARGUMENTS
 
 Before ANY POST / PATCH / PUT / DELETE, you MUST do ALL of the following in your response:
 
-1. **Check CLERK_SECRET_KEY** — verify it is set:
+1. **Check CLERK_SECRET_KEY** — verify it is set, without printing any part of it:
    ```bash
-   echo $CLERK_SECRET_KEY | head -c 10
+   [ -n "$CLERK_SECRET_KEY" ] && echo "set" || echo "missing"
    ```
-   If empty, stop and ask the user. Do not proceed without a valid key.
+   If missing, stop and ask the user. Do not proceed without a valid key.
 
 2. **Check CLERK_BAPI_SCOPES** — run:
    ```bash
@@ -239,7 +239,7 @@ bash scripts/api-specs-context.sh
 
 Use the output to determine the latest version and available tags.
 
-**Caching:** If you already fetched the spec context earlier in this conversation, do NOT fetch it again. Reuse the version and tags from the previous call.
+**Caching:** If you already fetched the spec context for the currently active version (the `--version` requested, or latest if none was specified) earlier in this conversation, do NOT fetch it again — reuse the version and tags from that previous call. If the user now asks for a different `--version`, fetch fresh context for that version instead of reusing the cached one.
 
 ---
 
