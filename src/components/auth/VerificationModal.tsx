@@ -15,7 +15,7 @@ type VerificationModalProps = {
   visible: boolean;
   email: string;
   onClose: () => void;
-  onComplete: () => void;
+  onComplete: (code: string) => void;
 };
 
 export function VerificationModal({
@@ -32,7 +32,8 @@ export function VerificationModal({
     setCode(digitsOnly);
 
     if (digitsOnly.length === CODE_LENGTH) {
-      onComplete();
+      onComplete(digitsOnly);
+      setCode("");
     }
   };
 
