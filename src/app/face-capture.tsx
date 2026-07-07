@@ -1,13 +1,47 @@
+import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { useState } from "react";
 import { Alert, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { images } from "@/constants/images";
+import { enrollFace, registerDevice } from "@/lib/api";
+
+const DEVICE_ID = process.env.EXPO_PUBLIC_DEVICE_ID as string;
 
 export default function FaceCapture() {
+  const { getToken } = useAuth();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadPhoto = async (photoUri: string) => {
+    setIsUploading(true);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Not signed in");
+
+      // Link this account to the car's edge device before enrolling, so
+      // the backend knows which device's embedding to save against.
+      await registerDevice(token, DEVICE_ID, "");
+      const result = await enrollFace(token, photoUri);
+
+      if (!result.success) {
+        Alert.alert("Couldn't verify your face", result.reason ?? "Please try again.");
+        return;
+      }
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert(
+        "Something went wrong",
+        error instanceof Error ? error.message : "Please try again.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleTakePicture = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -27,7 +61,7 @@ export default function FaceCapture() {
     });
 
     if (!result.canceled) {
-      router.replace("/");
+      await uploadPhoto(result.assets[0].uri);
     }
   };
 
@@ -50,7 +84,7 @@ export default function FaceCapture() {
     });
 
     if (!result.canceled) {
-      router.replace("/");
+      await uploadPhoto(result.assets[0].uri);
     }
   };
 
@@ -95,9 +129,10 @@ export default function FaceCapture() {
             className="flex-row items-center justify-between rounded-full bg-ww-deep-purple px-8 py-5"
             activeOpacity={0.85}
             onPress={handleTakePicture}
+            disabled={isUploading}
           >
             <Text className="font-poppins-semibold text-lg text-white">
-              Take a picture
+              {isUploading ? "Verifying..." : "Take a picture"}
             </Text>
             <Text className="font-poppins-bold text-2xl text-white">›</Text>
           </TouchableOpacity>
@@ -112,6 +147,7 @@ export default function FaceCapture() {
             className="items-center rounded-full border border-border py-5"
             activeOpacity={0.85}
             onPress={handleUploadPhoto}
+            disabled={isUploading}
           >
             <Text className="font-poppins-semibold text-lg text-text-primary">
               Upload from your phone

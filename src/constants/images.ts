@@ -3,4 +3,6 @@ export const images = {
   carSafe: require("@/assets/images/car-safe.png"),
   carRed: require("@/assets/images/car-red.png"),
   snap: require("@/assets/images/snap.png"),
+  surveillance: require("@/assets/images/surveilance.png"),
+  map: require("@/assets/images/map.png"),
 };
