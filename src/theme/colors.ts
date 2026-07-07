@@ -18,4 +18,8 @@ export const colors = {
     border: "#E5E7EB",
     background: "#FFFFFF",
   },
+  gradient: {
+    cardStart: "#4F7FF5",
+    cardEnd: "#8A5CF6",
+  },
 } as const;
