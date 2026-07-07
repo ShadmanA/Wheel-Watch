@@ -1,58 +1,161 @@
-HEAD
-# Wheel-Watch
-Mobile Car Surveillance Application designed for users to get realtime video stream of their car from any location, and alert users when anyone enters the vehicle or activates the alarm. It's main purpose is for security and to prevent car theft.
+# Wheel-Watch 🚗🔒
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**An AI-powered car surveillance app that turns your phone into a theft-prevention system.**
 
-## Get started
+## The Problem
 
-1. Install dependencies
+Car theft is fast, often silent, and usually discovered too late — after the vehicle is already gone. Traditional car alarms are easy to ignore (false alarms have trained people to tune them out), and by the time an owner notices their car is missing, there's little that can be done. Owners have no real-time visibility into who is near or inside their car, and no historical record of *where* their car has been at risk before.
 
-   ```bash
-   npm install
-   ```
+## The Solution
 
-2. Start the app
+Wheel-Watch is a mobile app paired with an on-device/edge AI pipeline that watches over a parked car and immediately alerts the owner the moment something looks wrong — a stranger's face at the wheel, the alarm going off, or the camera being covered. It combines:
 
-   ```bash
-   npx expo start
-   ```
+- **Biometric enrollment** — the owner registers their face once, on their own phone.
+- **Real-time face verification** — every time someone is detected in the driver's seat, their face is compared against the enrolled owner.
+- **Liveness detection** — a blink/expression check prevents someone from spoofing the system with a photo.
+- **Camera obstruction detection** — flags attempts to physically block or cover the camera.
+- **Audio alarm recognition** — listens for the car's own alarm sound and notifies the owner even if they're out of earshot.
+- **Instant push alerts** — the owner is notified on their phone the moment any of the above trips.
+- **Theft heatmap** — a community-sourced map of previously reported theft locations, with proximity alerts when parking near a hotspot.
+- **Ignition logs** — a timestamped, geotagged log of every time the car is started and turned off.
 
-In the output, you'll find options to open the app in a
+## Feature Status
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Feature | Status |
+|---|---|
+| Auth (Clerk: email + social sign-in) | ✅ Implemented |
+| Face enrollment (capture + upload) | ✅ Implemented |
+| Device registration & push notifications | ✅ Implemented |
+| Theft-location map | 🚧 Scaffolded (screen + API in place) |
+| Live camera feed screen | 🚧 Scaffolded |
+| Face recognition agent (match vs. enrolled owner) | 🔜 Planned |
+| Liveness / blink detection agent | 🔜 Planned |
+| Camera obstruction detection agent | 🔜 Planned |
+| Car alarm audio recognition agent | 🔜 Planned |
+| Proximity alert near reported theft locations | 🔜 Planned |
+| Ignition on/off location + time logs | 🔜 Planned |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Architecture
 
-## Get a fresh project
+Wheel-Watch is split into a **mobile client** (this repo) and a **backend/edge tier** that does anything sensitive or compute-heavy. The phone never holds API secrets and never runs face-matching against a database directly — it talks to a backend over HTTPS.
 
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+┌─────────────────────────────┐
+│         Mobile App          │
+│   Expo + React Native (TS)  │
+│                              │
+│  • Clerk auth                │
+│  • Face capture (camera)     │
+│  • Live video viewer         │
+│  • Theft-location map        │
+│  • Push notification receiver│
+└──────────────┬───────────────┘
+               │ HTTPS (Bearer token from Clerk)
+               ▼
+┌─────────────────────────────┐
+│      Backend / Edge API      │       ┌───────────────────────────┐
+│  (FastAPI-style REST API)    │──────▶│   Stream / GetStream       │
+│                              │       │  Video + real-time comms  │
+│  • /register-device          │       └───────────────────────────┘
+│  • /enroll (face upload)     │
+│  • /theft-locations           │       ┌───────────────────────────┐
+│  • /devices/:id/events        │──────▶│   AI / Vision Agents       │
+└──────────────┬────────────────┘       │  • Face detection          │
+               │                        │  • Face recognition        │
+               ▼                        │  • Liveness/blink check    │
+┌─────────────────────────────┐         │  • Obstruction detection   │
+│   Push Notification Service  │         │  • Alarm audio detection   │
+│   (Expo Notifications)       │         └───────────────────────────┘
+└─────────────────────────────┘
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Why split it this way?**
+- **Secrets stay off the device.** Clerk session tokens are verified server-side; API keys for Stream and any AI providers live only in the backend.
+- **Heavy AI inference runs off the phone** (or in a dedicated on-device model runtime), so the app stays fast and battery-friendly.
+- **The mobile app is a thin client**: capture input (photos/video/audio), display alerts, and render the map — all matching, detection, and storage logic lives server-side.
 
-### Other setup steps
+> Note: The backend/edge service is a separate project from this repo. This README documents the mobile client found here.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Tech Stack
 
-## Learn more
+- [Expo](https://expo.dev) + [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing)
+- React Native + TypeScript
+- [NativeWind](https://www.nativewind.dev/) (Tailwind CSS for React Native)
+- [Clerk](https://clerk.com/) for authentication
+- [Stream / GetStream](https://getstream.io/) for live video and real-time communication
+- Zustand for client state, AsyncStorage for persistence
+- Expo Notifications for push alerts
+- `expo-file-system` for multipart face-image upload
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+src/
+  app/              # Expo Router screens (routes only)
+    (auth)/          # sign-in / sign-up
+    index.tsx        # entry/redirect screen
+    onboarding.tsx
+    home.tsx
+    face-capture.tsx # biometric enrollment flow
+    live-feed.tsx    # live camera view
+    map.tsx          # theft-location map
+  components/       # Reusable UI (auth fields, buttons, cards)
+  constants/        # Centralized asset imports (images.ts)
+  hooks/            # Custom hooks (e.g. useSocialAuth)
+  lib/              # External service helpers (api.ts, notifications.ts)
+  theme/            # Colors, typography
+assets/             # Images, icons, fonts
+app.json            # Expo app config
+global.css          # Tailwind/NativeWind base styles
+```
 
-## Join the community
+## Getting Started
 
-Join our community of developers creating universal apps.
+### Prerequisites
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Node.js and npm
+- The [Expo Go](https://expo.dev/go) app (for quick device testing) or an iOS/Android simulator
+- A running instance of the Wheel-Watch backend (for the API endpoints used by `lib/api.ts`)
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```bash
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=   # from your Clerk dashboard
+EXPO_PUBLIC_DEVICE_ID=               # unique identifier for this device/vehicle
+EXPO_PUBLIC_BACKEND_URL=             # base URL of the Wheel-Watch backend API
+EXPO_PUBLIC_EDGE_URL=                # base URL of the edge/AI vision service
+```
+
+### 3. Start the app
+
+```bash
+npm run start
+```
+
+Then choose to open it in a development build, Android emulator, iOS simulator, or Expo Go from the Expo CLI output.
+
+Platform-specific shortcuts are also available:
+
+```bash
+npm run ios
+npm run android
+npm run web
+```
+
+### 4. Lint
+
+```bash
+npm run lint
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
