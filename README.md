@@ -26,14 +26,11 @@ Wheel-Watch is a mobile app paired with an on-device/edge AI pipeline that watch
 | Auth (Clerk: email + social sign-in) | ✅ Implemented |
 | Face enrollment (capture + upload) | ✅ Implemented |
 | Device registration & push notifications | ✅ Implemented |
-| Theft-location map | 🚧 Scaffolded (screen + API in place) |
-| Live camera feed screen | 🚧 Scaffolded |
-| Face recognition agent (match vs. enrolled owner) | 🔜 Planned |
-| Liveness / blink detection agent | 🔜 Planned |
-| Camera obstruction detection agent | 🔜 Planned |
-| Car alarm audio recognition agent | 🔜 Planned |
-| Proximity alert near reported theft locations | 🔜 Planned |
-| Ignition on/off location + time logs | 🔜 Planned |
+| Theft-location map | ✅ Implemented  |
+| Live camera feed screen | ✅ Implemented  |
+| Face recognition agent (match vs. enrolled owner) | ✅ Implemented |
+| Camera obstruction detection agent | ✅ Implemented  |
+| Car alarm audio recognition agent | ✅ Implemented  |
 
 ## Architecture
 
