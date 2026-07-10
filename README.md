@@ -75,6 +75,8 @@ Wheel-Watch is split into a **mobile client** (this repo) and a **backend/edge t
 
 ## Tech Stack
 
+### Mobile Front End
+
 - [Expo](https://expo.dev) + [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing)
 - React Native + TypeScript
 - [NativeWind](https://www.nativewind.dev/) (Tailwind CSS for React Native)
@@ -83,6 +85,25 @@ Wheel-Watch is split into a **mobile client** (this repo) and a **backend/edge t
 - Zustand for client state, AsyncStorage for persistence
 - Expo Notifications for push alerts
 - `expo-file-system` for multipart face-image upload
+
+### Edge Device
+
+- Python
+- OpenCV
+- MediaPipe (Tasks API — FaceDetector + FaceLandmarker)
+- LiteRT/TFLite runtime running a MobileFaceNet-class embedding model
+- YAMNet — car-alarm sound classification
+- FastAPI + Uvicorn
+- sounddevice + scipy — microphone capture and sample-rate resampling
+
+### Backend (Cloud Run)
+
+- Python
+- FastAPI + Uvicorn
+- FastMCP — the MCP server
+- Google ADK — the Security Analyst agent
+- Firebase Admin SDK + Firestore
+
 
 ## Project Structure
 
@@ -152,6 +173,9 @@ npm run web
 ```bash
 npm run lint
 ```
+## Demo Video
+
+https://www.youtube.com/watch?v=upEk1YznoJ4&t=67s
 
 ## License
 
