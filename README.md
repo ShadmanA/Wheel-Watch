@@ -175,22 +175,28 @@ npm run lint
 ```
 ## Screenshots
 
-#Landing Page
+Landing Page
+
 <img width="720" height="1600" alt="Screenshot_20260707_011905_Expo Go" src="https://github.com/user-attachments/assets/bd7ac276-74ef-4d64-bbab-f5a3706c722d" />
 
-#Sign up Page
+Sign up Page
+
 <img width="720" height="1600" alt="Screenshot_20260801_201137_Gallery" src="https://github.com/user-attachments/assets/a50b8624-9747-4e67-954a-f1783cd8f856" />
 
-#Login Page
+Login Page
+
 <img width="720" height="1600" alt="Screenshot_20260801_201207_Gallery" src="https://github.com/user-attachments/assets/b428137e-63bf-460b-b88c-b71a79adf938" />
 
-#Facial Verification Page
+Facial Verification Page
+
 <img width="720" height="1600" alt="Screenshot_20260707_021240_Expo Go" src="https://github.com/user-attachments/assets/c290e386-cfea-476b-8442-a08d341a0fe8" />
 
-#Home Page
+Home Page
+
 <img width="720" height="1600" alt="Screenshot_20260707_021201_Expo Go" src="https://github.com/user-attachments/assets/2de91086-df88-415f-8f2a-5ec8cc15723b" />
 
-#Live Camera Feed
+Live Camera Feed
+
 <img width="720" height="1600" alt="Screenshot_20260707_021231_Expo Go" src="https://github.com/user-attachments/assets/34024990-563f-4c8b-ba45-4092394f2b47" />
 
 
